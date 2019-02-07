@@ -1,0 +1,87 @@
+version: '2'
+services:
+  db1:
+    restart: always
+    image: sameersbn/postgresql:10-1
+    ports:
+      - "9990:5432"
+    environment:
+      - DEBUG=false
+
+      - DB_USER=pstg_test
+      - DB_PASS=pstg_test
+      - DB_NAME=pstg_test
+      - DB_TEMPLATE=
+
+      - DB_EXTENSION=
+
+      - REPLICATION_MODE=
+      - REPLICATION_USER=
+      - REPLICATION_PASS=
+      - REPLICATION_SSLMODE=
+    volumes:
+      - /srv/docker/postgresql:/var/lib/postgresql
+  db2:
+    restart: always
+    image: sameersbn/postgresql:10-1
+    ports:
+      - "9991:5432"
+    environment:
+      - DEBUG=false
+
+      - DB_USER=pstg_test
+      - DB_PASS=pstg_test
+      - DB_NAME=pstg_test
+      - DB_TEMPLATE=
+
+      - DB_EXTENSION=
+
+      - REPLICATION_MODE=
+      - REPLICATION_USER=
+      - REPLICATION_PASS=
+      - REPLICATION_SSLMODE=
+    volumes:
+      - /srv/docker/postgresql2:/var/lib/postgresql
+  db3:
+    restart: always
+    image: sameersbn/postgresql:10-1
+    ports:
+      - "9992:5432"
+    environment:
+      - DEBUG=false
+
+      - DB_USER=pstg_test
+      - DB_PASS=pstg_test
+      - DB_NAME=pstg_test
+      - DB_TEMPLATE=
+
+      - DB_EXTENSION=
+
+      - REPLICATION_MODE=
+      - REPLICATION_USER=
+      - REPLICATION_PASS=
+      - REPLICATION_SSLMODE=
+    volumes:
+      - /srv/docker/postgresql3:/var/lib/postgresql
+
+  zookeeper:
+    restart: always
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    restart: always
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1

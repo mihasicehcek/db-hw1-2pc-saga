@@ -26,9 +26,9 @@ class AmmountWorker(multiprocessing.Process):
                     updateAccount = dbAccount.prepare(
                         "UPDATE accounts SET ammount = ammount - $1 WHERE client_name = $2")
                     updateAccount(100000, 'a')
-                    producer.send('ammount-m', message.value)
+                    producer.send('funds-withdrawn', message.value)
                 except postgresql.exceptions.CheckError:
-                    producer.send('balance-exception', message.value)
+                    producer.send('funds-withdrawn-error', message.value)
                 producer.close()
 
 class FlyCancelerWorker(multiprocessing.Process):
@@ -44,7 +44,7 @@ class FlyCancelerWorker(multiprocessing.Process):
         deleteFlyBook = dbFly.prepare("delete from fly_booking where booking_id = $1")
 
         consumer = KafkaConsumer(bootstrap_servers='localhost:9092', consumer_timeout_ms=1000)
-        consumer.subscribe(['hotel-calnceled'])
+        consumer.subscribe(['funds-withdrawn-error'])
 
         while not self.stop_event.is_set():
             for message in consumer:
@@ -93,7 +93,7 @@ class HotelCancelerWorker(multiprocessing.Process):
         deleteHolelBook = dbHotel.prepare("delete from hotel_booking where booking_id = $1")
 
         consumer = KafkaConsumer(bootstrap_servers='localhost:9092', consumer_timeout_ms=1000)
-        consumer.subscribe(['balance-exception'])
+        consumer.subscribe(['funds-withdrawn-error'])
 
         while not self.stop_event.is_set():
             for message in consumer:
